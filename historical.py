@@ -22,7 +22,7 @@ def get_season_games(league_id, season):
            return games
        for game in r.json().get("response", []):
            status = game.get("status", {}).get("long", "")
-           if status not in ["Finished", "FT"]:
+           if status not in ["Game Finished", "After Over Time", "Finished", "FT"]:
                continue
            home = game.get("teams", {}).get("home", {})
            away = game.get("teams", {}).get("away", {})

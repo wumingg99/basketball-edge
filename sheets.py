@@ -75,7 +75,7 @@ def log_results(date=None):
                 params={"league": league_id, "season": tz_now.year, "date": target_date},
                 timeout=10)
             for game in r.json().get("response", []):
-                if game.get("status", {}).get("long") not in ["Finished", "FT"]:
+                if game.get("status", {}).get("long") not in ["Game Finished", "After Over Time", "Finished", "FT"]:
                     continue
                 home = game["teams"]["home"]["name"]
                 away = game["teams"]["away"]["name"]

@@ -31,7 +31,7 @@ def get_todays_games():
             data = r.json()
             for game in data.get("response", []):
                 status = game.get("status", {}).get("long", "")
-                if status in ["Postponed", "Cancelled"]:
+                if status in ["Postponed", "Cancelled", "Not Started"]:
                     continue
                 home = game.get("teams", {}).get("home", {})
                 away = game.get("teams", {}).get("away", {})
