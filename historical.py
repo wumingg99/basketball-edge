@@ -6,7 +6,7 @@ import warnings
 warnings.filterwarnings("ignore")
 from config import API_BASKETBALL_BASE, API_HEADERS, LEAGUE_TIERS, TIER_FACTORS, LEAGUE_AVG_TOTALS, DEFAULT_AVG_TOTAL
 
-SEASON_WEIGHTS = {2023: 0.5, 2024: 0.75, 2025: 1.0, 2026: 2.0}
+SEASON_WEIGHTS = {2022: 0.5, 2023: 0.75, 2024: 1.0, 2025: 2.0}
 
 def get_league_avg(league_id):
    return LEAGUE_AVG_TOTALS.get(league_id, DEFAULT_AVG_TOTAL)
@@ -143,7 +143,7 @@ def train_on_historical():
        tier = league_info["tier"]
        league_avg = get_league_avg(league_id)
        league_games = 0
-       for season in [2023, 2024, 2025, 2026]:
+       for season in [2022, 2023, 2024, 2025]:
            season_weight = SEASON_WEIGHTS.get(season, 1.0)
            games = get_season_games(league_id, season)
            if not games:
