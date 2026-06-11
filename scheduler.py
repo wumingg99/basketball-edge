@@ -15,11 +15,8 @@ async def scheduled_brief(app):
             return
         edge_count = sum(1 for _, p, _ in games_data
                          if p and (p.get("edge_flagged") or p.get("spread_edge_flagged")))
-        if edge_count > 0:
-            await send_message(app, format_summary(games_data, now))
-        else:
-            await send_message(app,
-                f"🏀 Basketball Edge — {now}\n\n{len(games_data)} games — no edges flagged.")
+        # Always send brief regardless of edges
+        await send_message(app, format_summary(games_data, now))
     except Exception as e:
         print(f"Brief error: {e}", flush=True)
 
