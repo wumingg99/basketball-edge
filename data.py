@@ -12,7 +12,11 @@ def get_league_avg(league_id):
 def get_todays_games():
     tz = pytz.timezone(TIMEZONE)
     sgt_now = datetime.now(tz)
-    if sgt_now.hour >= 11:
+    # WNBA games finish ~midnight ET = noon SGT next day
+    # Switch to next day after 1PM SGT (1AM ET, after all games done)
+    et_tz = pytz.timezone("America/New_York")
+    et_now = datetime.now(et_tz)
+    if et_now.hour >= 23:
         today = (sgt_now + timedelta(days=1)).strftime("%Y-%m-%d")
         _cache["showing_next_day"] = True
     else:
@@ -31,7 +35,7 @@ def get_todays_games():
             data = r.json()
             for game in data.get("response", []):
                 status = game.get("status", {}).get("long", "")
-                if status in ["Postponed", "Cancelled", "Not Started"]:
+                if status in ["Postponed", "Cancelled"]:
                     continue
                 home = game.get("teams", {}).get("home", {})
                 away = game.get("teams", {}).get("away", {})

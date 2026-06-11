@@ -252,8 +252,10 @@ def main():
     async def post_init(application):
         scheduler.start()
         print("Scheduler started — SGT timezone")
-        preload_all_data(ODDS_API_KEY)
-        print("Basketball Edge Bot is live")
+        import threading
+        t = threading.Thread(target=preload_all_data, args=(ODDS_API_KEY,), daemon=True)
+        t.start()
+        print("Basketball Edge Bot is live — preloading in background")
 
     app.post_init = post_init
     app.run_polling(drop_pending_updates=True)
