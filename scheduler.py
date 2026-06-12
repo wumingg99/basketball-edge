@@ -143,7 +143,13 @@ async def nightly_retrain(app):
         print(f"Retrain error: {e}", flush=True)
 
 def setup_scheduler(app):
-    scheduler = AsyncIOScheduler(timezone=tz)
+    scheduler = AsyncIOScheduler(
+        timezone=tz,
+        job_defaults={
+            "misfire_grace_time": 3600,
+            "coalesce": True,
+        }
+    )
     for hour in [0, 3, 6, 9, 12, 15, 18, 21]:
         scheduler.add_job(check_new_lines, CronTrigger(hour=hour, minute=0, timezone=tz),
             args=[app], id=f"new_lines_{hour}", name=f"New Lines {hour}:00")

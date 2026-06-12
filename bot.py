@@ -56,6 +56,36 @@ async def fetch_all_games(api_key=None):
         print(f"Prediction logging error: {e}")
     return [g for g, c, o in cached], games_data
 
+def format_lines(games_data, now):
+    from data import _cache
+    showing_next = _cache.get("showing_next_day", False)
+    day_label = "tomorrow" if showing_next else "today"
+    msg = f"🏀 Basketball Lines — {now}\n"
+    msg += f"{len(games_data)} games {day_label} | implied vs actual\n"
+    msg += "━" * 20 + "\n"
+    current_league = ""
+    for game, pred, odds in games_data:
+        league = game["league_name"]
+        if league != current_league:
+            msg += f"\n{league}\n"
+            current_league = league
+        home = game["home_team"]
+        away = game["away_team"]
+        if pred:
+            total = odds.get("total") if odds else "N/A"
+            edge = "⚡" if (pred.get("edge_flagged") or pred.get("spread_edge_flagged")) else "  "
+            msg += (
+                f"{edge} {away} @ {home}\n"
+                f"   O/U: ours {pred['total_pred']} vs {total} "
+                f"({pred['total_gap']:+.1f}) — {pred['total_votes']}/4\n"
+                f"   Spread: {pred['spread_pred']} — {pred['spread_votes']}/4\n"
+            )
+        else:
+            msg += f"   {away} @ {home} — no data\n"
+    msg += "\n" + "━" * 20 + "\n⚡ = edge threshold met"
+    return msg
+
+
 def format_summary(games_data, now):
     from data import _cache
     showing_next = _cache.get("showing_next_day", False)
@@ -110,6 +140,17 @@ async def morning_brief(app):
         await send_message(app, format_summary(games_data, now))
     else:
         await send_message(app, f"🏀 Basketball Edge — {now}\n\n{len(games_data)} games — no edges flagged.")
+
+async def cmd_basketball_lines(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    now = datetime.now(tz).strftime("%b %d, %Y")
+    await update.message.reply_text("⏳ Fetching all lines...")
+    games, games_data = await fetch_all_games(ODDS_API_KEY)
+    if not games:
+        await update.message.reply_text("🏀 No basketball games today.")
+        return
+    msg = format_lines(games_data, now)
+    await update.message.reply_text(msg)
+
 
 async def cmd_basketball_brief(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("⏳ Loading basketball edges...")
@@ -243,6 +284,7 @@ def main():
     print("Starting Basketball Edge Bot...")
     app = Application.builder().token(TELEGRAM_TOKEN).build()
     app.add_handler(CommandHandler("basketball_brief", cmd_basketball_brief))
+    app.add_handler(CommandHandler("basketball_lines", cmd_basketball_lines))
     app.add_handler(CommandHandler("basketball_edge", cmd_basketball_edge))
     app.add_handler(CommandHandler("basketball_refresh", cmd_basketball_refresh))
     app.add_handler(CommandHandler("basketball_results", cmd_basketball_results))
